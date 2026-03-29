@@ -43,7 +43,11 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'accounts',
-    'products'
+    'products',
+    'cart',
+    'wishlist',
+    'orders',
+    'adminpanel'
 ]
 
 MIDDLEWARE = [
@@ -157,5 +161,9 @@ STATIC_URL = 'static/'
 
 MEDIA_URL='/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR,'media')
+
+
+RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET')
 
 

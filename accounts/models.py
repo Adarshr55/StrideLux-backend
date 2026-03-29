@@ -21,6 +21,7 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     email=models.EmailField(unique=True)
     is_admin=models.BooleanField(default=False)
+    is_blocked=models.BooleanField(default=False)
     phone=models.CharField(max_length=15,blank=True,null=True)
     address=models.TextField(blank=True,null=True)
     created_at=models.DateTimeField(auto_now_add=True)

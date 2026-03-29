@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+
 
 # Create your models here.
 class Category(models.Model):
@@ -20,7 +22,7 @@ class Product(models.Model):
     description=models.TextField(blank=True,null=True)
     price=models.DecimalField(max_digits=10,decimal_places=2)
     stock=models.PositiveIntegerField(default=0)
-    rating=models.DecimalField(max_digits=3,decimal_places=2,default=0.0)
+    rating=models.DecimalField(max_digits=3,decimal_places=2,default=0.0,validators=[MinValueValidator(0.0),MaxValueValidator(5.0)])
     thumbnail=models.ImageField(upload_to='thumbnails/',blank=True,null=True)
     is_active=models.BooleanField(default=True)
     created_at=models.DateTimeField(auto_now_add=True)

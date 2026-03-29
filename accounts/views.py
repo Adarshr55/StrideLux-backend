@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .serializers import RegisterSerializer,UserSerializer,LoginSerializer
+from .serializers import RegisterSerializer,UserSerializer  
 from django.contrib.auth import get_user_model,authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,6 +14,19 @@ class RegisterView(APIView):
     permission_classes=[AllowAny]
 
     def post(self,request):
+        email = request.data.get('email', '').strip()
+        existing = User.objects.filter(email=email).first()
+        if existing:
+            if not existing.is_active:
+                return Response(
+                    {'error': 'This account has been deleted. Please contact support.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            if existing.is_blocked:
+                return Response(
+                    {'error': 'This account has been blocked. Please contact support.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
         serializer=RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user=serializer.save()
@@ -64,6 +77,12 @@ class LoginView(APIView):
             return Response(
                 {'error': 'Your account has been deactivated'},
                 status=status.HTTP_403_FORBIDDEN
+            )
+        if user.is_blocked:
+            return Response(
+                 {'error': 'Your account has been blocked. Please contact support.'},
+                status=status.HTTP_403_FORBIDDEN
+
             )
 
        

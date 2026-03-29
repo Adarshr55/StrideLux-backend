@@ -7,7 +7,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model=User
-        fields=['id','username','email','is_admin','phone','address']
+        fields=['id','username','email','is_admin','is_blocked','phone','address','is_active','created_at']
 
 class RegisterSerializer(serializers.ModelSerializer):
     password=serializers.CharField(write_only=True,min_length=6)
@@ -52,6 +52,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             return user
 
 
-class LoginSerializer(serializers.Serializer):
-    email=serializers.EmailField()
-    password=serializers.CharField(write_only=True)
+# class LoginSerializer(serializers.Serializer):
+#     email=serializers.EmailField()
+#     password=serializers.CharField(write_only=True)

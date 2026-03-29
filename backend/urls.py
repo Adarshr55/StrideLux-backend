@@ -22,6 +22,10 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/',include('accounts.urls')),
-    path('api/',include('products.urls'))
+    path('api/',include('products.urls')),
+    path('api/',include('cart.urls')),
+    path('api/',include('wishlist.urls')),
+    path('api/',include('orders.urls')),
+    path('api/',include('adminpanel.urls'))
 
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

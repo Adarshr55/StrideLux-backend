@@ -18,6 +18,9 @@ class CategoryListView(ListAPIView):
     queryset=Category.objects.all()
     serializer_class=CategorySerializer
 
+    def get_serializer_context(self):
+        return {'request':self.request}
+
 class ProductListView(APIView):
     permission_classes=[AllowAny]
     def get(self,request):
@@ -29,7 +32,7 @@ class ProductListView(APIView):
 
         category = request.query_params.get('category')
         if category:
-            products = products.filter(category__name__icontains=category)
+            products = products.filter(category__name__iexact=category)
         serializer=ProductSerializer(products,many=True,context={'request':request})
         return Response(serializer.data)
 
@@ -39,3 +42,7 @@ class ProductDetailsView(RetrieveAPIView):
   
     def get_queryset(self):
         return Product.objects.filter(is_active=True)
+    
+
+    def get_serializer_context(self): 
+        return {'request': self.request}
