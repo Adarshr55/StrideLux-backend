@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+     'drf_spectacular',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
@@ -68,20 +69,18 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
-REST_FRAMEWORK={
-
-    'DEFAULT_AUTHENTICATION_CLASSES':[
-         'rest_framework_simplejwt.authentication.JWTAuthentication'
-
-    ]
-   
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 from datetime import timedelta
 
 SIMPLE_JWT={
-    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=30),
-    "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME":timedelta(days=7),
     "ROTATE_REFRESH_TOKENS":True,
     "BLACKLIST_AFTER_ROTATION":True
 }
@@ -165,5 +164,14 @@ MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 
 RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET')
+
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'StrideLux API',
+    'DESCRIPTION': 'E-commerce backend API for StrideLux shoe store',
+    'VERSION': '1.0.0',
+}
+
 
 

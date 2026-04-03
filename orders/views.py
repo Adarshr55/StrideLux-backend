@@ -29,7 +29,7 @@ class OrderListView(APIView):
         if not cart_items.exists():
             return Response({'error':'Cart is empty'},status=status.HTTP_400_BAD_REQUEST)
         
-        order=Order.objects.create(user=request.user,total=cart.items.count() and 
+        order=Order.objects.create(user=request.user,total=
                 sum(float(item.product.price)*item.quantity
                      for item in cart_items),
                       fullname=data.get('fullname', ''),

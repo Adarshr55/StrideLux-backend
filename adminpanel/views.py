@@ -12,6 +12,10 @@ from rest_framework.response import Response
 from products.serializers import ProductSerializer,ProductDetailSerializer,CategorySerializer
 from accounts.serializers import  UserSerializer
 from orders.serializers import OrderSerializer
+from django.db import models as db_models
+from utils.pagination import paginate_queryset
+from django.db.models import Case, When, Value, IntegerField
+
 # Create your views here.
 User=get_user_model()
 
@@ -77,9 +81,34 @@ class AdminProductListView(APIView):
     permission_classes=[IsAdminUser]
 
     def get(self,request):
+        search = request.query_params.get('search', '')
+        category = request.query_params.get('category', '')
+        is_active = request.query_params.get('is_active', 'true')
+
         products=Product.objects.all().order_by('-created_at')
-        serializer=ProductSerializer(products,many=True,context={'request':request})
-        return Response(serializer.data)
+        if is_active == 'true':
+            products = products.filter(is_active=True)
+        else:
+            products = products.filter(is_active=False)
+
+        if search:
+            products = products.filter(
+                db_models.Q(name__icontains=search) |
+                db_models.Q(brand__icontains=search)
+            )
+        if category and category != 'All':
+            products = products.filter(category__name__iexact=category)
+        
+        result = paginate_queryset(products, request, page_size=8)
+
+        serializer = ProductSerializer(
+            result['queryset'], many=True, context={'request': request}
+        )
+
+        return Response({
+            'results': serializer.data,
+            **result['meta']     
+        })
     
     def post(self,request):
         category_name = request.data.get('category', '').lower()
@@ -146,9 +175,30 @@ class AdminUserListView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request):
-        users = User.objects.filter(is_admin=False).order_by('-created_at')
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
+       
+       search = request.query_params.get('search', '')
+       is_active = request.query_params.get('is_active', 'true')
+
+       users = User.objects.filter(is_admin=False).order_by('-created_at')
+
+       if is_active == 'false':
+            users = users.filter(is_active=False)
+       else:
+            users = users.filter(is_active=True)
+
+       if search:
+            users = users.filter(
+                db_models.Q(username__icontains=search) |
+                db_models.Q(email__icontains=search)
+            )
+
+       result = paginate_queryset(users, request, page_size=10)
+
+       serializer = UserSerializer(result['queryset'], many=True)
+       return Response({
+            'results': serializer.data,
+            **result['meta']
+        })
 
 class AdminUserBlockView(APIView):
     permission_classes = [IsAdminUser]
@@ -182,9 +232,35 @@ class AdminOrderListview(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self,request):
-        order=Order.objects.all().order_by('-created_at')
-        serializer=OrderSerializer(order,many=True)
-        return Response(serializer.data)
+        search = request.query_params.get('search', '')
+        status_filter = request.query_params.get('status', '')
+
+        orders = Order.objects.all().annotate(
+            status_order=Case(
+                When(status='pending', then=Value(1)),
+                When(status='shipped', then=Value(2)),
+                When(status='delivered', then=Value(3)),
+                When(status='cancelled', then=Value(4)),
+                default=Value(5),
+                output_field=IntegerField(),
+            )
+        ).order_by('status_order', '-created_at')
+
+        if search:
+            orders = orders.filter(
+                db_models.Q(id__icontains=search) |
+                db_models.Q(user__username__icontains=search)
+            )
+        if status_filter and status_filter != 'All':
+            orders = orders.filter(status=status_filter)
+
+        result = paginate_queryset(orders, request, page_size=10)
+
+        serializer = OrderSerializer(result['queryset'], many=True)
+        return Response({
+            'results': serializer.data,
+            **result['meta']
+        })
     
 class AdminOrderDetailView(APIView):
     permission_classes=[IsAdminUser]
@@ -194,6 +270,12 @@ class AdminOrderDetailView(APIView):
             order = Order.objects.get(id=pk)
         except Order.DoesNotExist:
             return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if order.status in ['delivered', 'cancelled']:
+            return Response(
+            {'error': 'Cannot change completed or cancelled orders'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
         new_status = request.data.get('status')
         if new_status not in ['pending', 'shipped', 'delivered', 'cancelled']:
             return Response({'error': 'Invalid status'}, status=status.HTTP_404_NOT_FOUND)
