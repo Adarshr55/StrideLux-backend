@@ -8,6 +8,11 @@ urlpatterns=[
     path('logout/',views.LogoutView.as_view(),name='logout'),
     path('token/refresh/',TokenRefreshView.as_view(),name='token_refresh'),
 
+    path('verify-email/<uuid:token>/', views.VerifyEmailView.as_view()),
+    path('resend-verification/', views.ResendVerificationView.as_view()),
+    path('forgot-password/', views.ForgotPasswordView.as_view()),
+    path('reset-password/<uuid:token>/', views.ResetPasswordView.as_view()),
+
 
 
 
