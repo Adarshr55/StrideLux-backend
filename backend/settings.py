@@ -53,10 +53,8 @@ INSTALLED_APPS = [
     'cart',
     'wishlist',
     'orders',
-    'adminpanel',
-    'cloudinary',
-    'cloudinary_storage'
-]
+    'adminpanel'
+    ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -207,12 +205,11 @@ DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER', default='')
 
 FRONTEND_URL = 'http://localhost:5173'
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
-    'API_KEY': config('CLOUDINARY_API_KEY', default=''),
-    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
-}
-
-
 if os.environ.get('CLOUDINARY_CLOUD_NAME'):
+    INSTALLED_APPS += ['cloudinary', 'cloudinary_storage']
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+        'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    }
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
